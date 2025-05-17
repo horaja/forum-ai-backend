@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+env/
+.env
+.venv
+
+# IDE / Editor specific (good practice for team collaboration)
+.idea/
+.vscode/
+
+# OS specific (good practice for cross-platform collaboration)
+.DS_Store
+Thumbs.db
+
+# Secrets (CRITICAL)
+*.pem
+*.key
+credentials.json
+# Add any other specific secret file names you might use
