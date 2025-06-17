@@ -111,19 +111,22 @@ COURSE_CONCEPTS = [
 	"Coding Style"
 ]
 
-@app.route('api/v1/suggest-tags', methods=['POST'])
+@app.route('/api/v1/suggest-tags', methods=['POST'])
 def suggest_tags():
 	"""
 	Receives text content and returns a list of suggested concept tags
 	"""
+	# For debugging purposes:
+	print(">>> Received request to /api/v1/suggest-tags", flush=True);
 	if not request.json or 'content' not in request.json:
 		return jsonify({"error": "Missing 'content' in request body"}), 400
 
 	content = request.json['content']
 
 	results = classifier(content, COURSE_CONCEPTS, multi_label=True)
+	print(f"--> Raw classification results: {results}", flush=True)
 
-	confidence_threshold = 0.80
+	confidence_threshold = 0.50
 	suggested_tags = [
 		results['labels'][i] for i, score in enumerate(results['scores']) if score > confidence_threshold
 	]
