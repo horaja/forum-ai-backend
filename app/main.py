@@ -1,10 +1,16 @@
 from flask import Flask, request, jsonify
 from transformers import pipeline
+import numpy as np
 
 app = Flask(__name__)
 
 # for deployment: change to smaller model
-classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+classifier = pipeline(
+	"zero-shot-classification",
+	model="facebook/bart-large-mnli",
+	# Make the hypothesis less course dependent
+	hypothesis_template="You are an expert TA for computer systems, and this post is about the computer systems topic of {}."
+)
 
 # for deployment: add automation to this process
 # TODO: Reduce List + add to Admin board
@@ -126,10 +132,24 @@ def suggest_tags():
 	results = classifier(content, COURSE_CONCEPTS, multi_label=True)
 	print(f"--> Raw classification results: {results}", flush=True)
 
-	confidence_threshold = 0.50
-	suggested_tags = [
-		results['labels'][i] for i, score in enumerate(results['scores']) if score > confidence_threshold
-	]
+	# Advanced Maximum Gap Selection Algorithm
+	MAX_TAGS = 3
+	MIN_CONFIDENCE = 0.15
+
+	scores = results['scores']
+	labels = results['labels']
+
+	if not scores or scores[0] < MIN_CONFIDENCE:
+		suggested_tags = []
+	
+	if len(scores) == 1:
+		suggested_tags = [labels[0]]
+
+	gaps = np.diff(scores) * -1
+	max_gap_index = np.argmax(gaps[:MAX_TAGS])
+	num_tags_to_return = max_gap_index + 1
+
+	suggested_tags = labels[:num_tags_to_return]
 
 	return jsonify({"suggested_tags": suggested_tags})
 
