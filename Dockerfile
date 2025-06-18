@@ -2,7 +2,7 @@ FROM python:3.9-slim
 
 WORKDIR /usr/src/app
 
-ENV FLASK_APP app/main.py
+ENV FLASK_APP=app/main.py
 
 COPY requirements.txt ./
 
